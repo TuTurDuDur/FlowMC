@@ -24,7 +24,17 @@ def format(srcPath, namespace):
     content = explorer.getFunctionContent(srcPath)
 
     currentChunk = ""
+    subFunctionsCount = 0
+    knownLabels = []
 
     for line in content:
         if line.startswith("label"):
+            labelName = line[7:]
+            if labelName in knownLabels:
+                index = knownLabels.index(labelName)
+            else:
+                index = len(knownLabels-1)
+                knownLabels.append(labelName)
             currentChunk.append(f"function {namespace}:{}")
+
+        if line.startswith("goto")
