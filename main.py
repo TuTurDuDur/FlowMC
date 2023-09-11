@@ -4,7 +4,7 @@ from utils import *
 class FileExplorer:
 
     def getFunctionContent(self, path: str) -> str:
-        with open(path + (".mcfunction" if not path.endswith(".mcfunction") else ""), "r") as file:
+        with open(path + (".flowmc" if not path.endswith(".mcfunction") else ""), "r") as file:
             return file.read()
 
     def createFunction(self, path: str, content: str) -> None:
@@ -13,14 +13,14 @@ class FileExplorer:
         file.write(content)
         file.close()
 
-    def createSubFunction(self, rootPath: str, functionName: str, content: str, index: str) -> None:
+    def createSubFunction(self, rootPath: str, functionName: str, content: str, index: int) -> None:
         os.makedirs(rootPath + "/" + functionName, exist_ok=True)
         self.createFunction(rootPath + "/" + functionName + "/" + indexToUUID(index), content)
 
 explorer = FileExplorer()
 
 # Turns custom function to actual code
-@logger
+
 def format(srcPath, targetPath, namespace="test"):
     os.makedirs(os.path.dirname(targetPath), exist_ok=True)
 
