@@ -2,39 +2,69 @@ import os
 from utils import *
 
 class FileExplorer:
+
     def getFunctionContent(self, path: str) -> str:
         with open(path + (".mcfunction" if not path.endswith(".mcfunction") else ""), "r") as file:
             return file.read()
 
     def createFunction(self, path: str, content: str) -> None:
+
         file = open(path + ".mcfunction", "w")
         file.write(content)
         file.close()
 
-    def createSubFunction(self, rootPath: str, content: str, index: str) -> None:
-        self.createFunction(rootPath + "/" + indexToUUID(index), content)
+    def createSubFunction(self, rootPath: str, functionName: str, content: str, index: str) -> None:
+        os.makedirs(rootPath + "/" + functionName, exist_ok=True)
+        self.createFunction(rootPath + "/" + functionName + "/" + indexToUUID(index), content)
 
 explorer = FileExplorer()
 
 # Turns custom function to actual code
-def format(srcPath, namespace):
-    targetPath = "./result/" + srcPath
+@logger
+def format(srcPath, targetPath, namespace="test"):
     os.makedirs(os.path.dirname(targetPath), exist_ok=True)
 
-    content = explorer.getFunctionContent(srcPath)
+    content = explorer.getFunctionContent(srcPath).split("\n")
 
     currentChunk = ""
-    subFunctionsCount = 0
+    currentFunctionIndex = 0
     knownLabels = []
+    FUNCTION_NAME = srcPath.split("/")[-1]
+    potentiallyUnmatchedGotos = {}
 
-    for line in content:
+    labelMet = False
+
+    for lineNumber, line in enumerate(content):
         if line.startswith("label"):
-            labelName = line[7:]
-            if labelName in knownLabels:
-                index = knownLabels.index(labelName)
-            else:
-                index = len(knownLabels-1)
-                knownLabels.append(labelName)
-            currentChunk.append(f"function {namespace}:{}")
+            labelName = line[6:]
 
-        if line.startswith("goto")
+            if not labelMet:
+                labelMet = True
+                explorer.createFunction(targetPath +"/"+ FUNCTION_NAME,currentChunk + f"\nfunction {namespace}:{FUNCTION_NAME}/{indexToUUID(0)}")
+                currentChunk = ""
+
+            if labelName in knownLabels:
+                currentFunctionIndex = knownLabels.index(labelName)
+            else:
+                knownLabels.append(labelName)
+                currentFunctionIndex = len(knownLabels)-1
+
+
+            continue
+
+        elif line.startswith("goto"):
+            targetLabelName = line[4:]
+            if targetLabelName in knownLabels:
+                targetLabelIndex = knownLabels.index(targetLabelName)
+            else:
+                knownLabels.append(targetLabelName)
+                targetLabelIndex = len(knownLabels)-1
+                potentiallyUnmatchedGotos.update({targetLabelName : lineNumber})
+            currentChunk += (f"\nfunction {namespace}:{FUNCTION_NAME}/{indexToUUID(targetLabelIndex)}")
+            
+            explorer.createSubFunction(targetPath, FUNCTION_NAME, currentChunk,currentFunctionIndex)
+            currentChunk = ""
+        else:
+            currentChunk += "\n"+line
+
+format("./examples/myfunction","./examples/result")
