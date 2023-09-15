@@ -11,9 +11,9 @@ class FileExplorer: # Automatically adds file extension to the paths
         file.write(content)
         file.close()
 
-    def createSubFunctionFile(self, rootPath: str, functionName: str, content: str, index: int) -> None:
-        os.makedirs(rootPath + "/" + functionName, exist_ok=True)
-        self.createFunction(rootPath + "/" + functionName + "/" + indexToUUID(index), content)
+    def createSubFunctionFile(self, path: str, content: str, subFunctionID: str) -> None:
+        os.makedirs(path, exist_ok=True)
+        self.createFunction(path+ "/" + subFunctionID, content)
 
 EXPLORER = FileExplorer()
 
@@ -31,10 +31,11 @@ class SubFunction:
         self.addLine(f'function { self.namespace }:{ self.path }/{subFunctionUUID}')
 
     def createFile(self):
-        EXPLORER.createSubFunctionFile(self.path, self.subFunctionName)
+        EXPLORER.createSubFunctionFile(self.path, self.content, self.UUID)
+        self._reset()
     
-    def reset(self):
-        content = ""
+    def _reset(self):
+        self.content = ""
 
 
     
@@ -59,17 +60,27 @@ def format(srcPath, targetPath, namespace="test"):
     for lineNumber, line in enumerate(content):
         if line.startswith("label"):
             labelName = line [6:]
-            knownLabels.update({labelName : (UUID := indexToUUID(len(knownLabels)))})
 
+            UUID = indexToUUID(len(knownLabels))
+            knownLabels.update({labelName : UUID})
+            
             if currentFunction.content != "":
-                currentFunction.addSubFunctionReference(UUID)          
-            currentFunction.reset()
+                currentFunction.addSubFunctionReference(UUID)
+                currentFunction.createFile()
 
 
         elif line.startswith("goto"):
             targetLabelName = line[5:]
+            if targetLabelName not in knownLabels.keys():
+                UUID = indexToUUID(len(knownLabels))
+                knownLabels.update({labelName: UUID})
+            else:
+                UUUID = knownLabels[targetLabelName]
+            currentFunction.addSubFunctionReference(UUID)
+            currentFunction.createFile()
+
 
         else:
-            if line != "": currentChunk += "\n"+line
+            currentFunction.addLine(line)
 
 format("./examples/myfunction","./examples/result")
