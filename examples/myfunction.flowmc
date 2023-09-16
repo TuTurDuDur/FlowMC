@@ -1,18 +1,18 @@
-zero
+say 0
 
 label a
 
-a
+say a
 
 goto c
 label b
 
-b
+say b
 
 goto a
 label c
 
-c
+say c
 
 goto b
 
