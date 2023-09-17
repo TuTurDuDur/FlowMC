@@ -50,7 +50,7 @@ class SubFunction:
 
 # Turns custom function to actual code
 
-def format(srcPath, targetPath,namespace="test"):
+def compile(srcPath, targetPath,namespace="test"):
     unsureGoto = []
     # Set up
     os.makedirs(os.path.dirname(targetPath), exist_ok=True) # creates the path to the final mcfunction files
@@ -96,4 +96,4 @@ def format(srcPath, targetPath,namespace="test"):
         else:
             currentFunction.addLine(line)
 
-format("examples/myfunction","examples/result")
+compile("examples/myfunction","examples/result")
