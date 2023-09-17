@@ -67,7 +67,7 @@ def format(srcPath, targetPath,namespace="test"):
     currentFunction = SubFunction(targetPath, namespace, UUID = indexToUUID(0), motherName = FUNCTION_NAME)
 
     for lineNumber, line in enumerate(content):
-        if line.startswith("label"):
+        if line.startswith("label "):
             labelName = line [6:]
             if labelName not in knownLabels:
                 UUID = indexToUUID(len(knownLabels))
@@ -82,7 +82,7 @@ def format(srcPath, targetPath,namespace="test"):
 
 
 
-        elif line.startswith("goto"):
+        elif line.startswith("goto "):
             targetLabelName = line[5:]
             if targetLabelName not in knownLabels:
                 UUID = indexToUUID(len(knownLabels))
